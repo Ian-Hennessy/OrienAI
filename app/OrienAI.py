@@ -2,8 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from openai import OpenAI
 from dotenv import load_dotenv
 import pdfminer.high_level
-client = OpenAI(api_key="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")
-
+import os
 load_dotenv()
 
 client = OpenAI(os.getenv("OPENAIKEY"))
