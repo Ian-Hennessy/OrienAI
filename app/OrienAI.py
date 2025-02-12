@@ -1,11 +1,18 @@
 from flask import Flask, render_template, jsonify, request
 from openai import OpenAI
-
-client = OpenAI(api_key="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")
+from dotenv import load_dotenv
 import pdfminer.high_level
+client = OpenAI(api_key="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")
+
+load_dotenv()
+
+client = OpenAI(os.getenv("OPENAIKEY"))
 app = Flask(__name__)
 
-
+if __name__ == '__main__':
+    # Get the port from environment variable, default to 5000 if not set.
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
 # OpenAI API Key
 
 def extract_text_from_pdf(pdf_file):
