@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OrienAI: Jumpstart Your Resume!</title>
+    <script>
+        function uploadResume() {
+            let formData = new FormData();
+            formData.append("resume", document.getElementById("resume").files[0]);
+
+            fetch("/", { method: "POST", body: formData })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("feedback").innerText = data.feedback;
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Upload Your Resume for Review</h1>
+    <input type="file" id="resume">
+    <button onclick="uploadResume()">Analyze</button>
+    <h2>Feedback:</h2>
+    <p id="feedback"></p>
+</body>
+</html>
