@@ -22,9 +22,9 @@ def extract_text_from_docx(docx_file) -> str:
 
 
 
-def analyze_resume(text):
+def analyze_resume_with_specs(text, specs):
     prompt = f"""
 You are a highly experienced career mentor and recruiter. Your task is to analyze the following resume and provide structured, high-quality feedback that is both informative and encouraging. Your analysis should cover:
 
 Formatting Issues: Identify any layout or design problems that could confuse the reader or detract from the overall presentation.
-Missing Key Skills: Point out any important skills or competencies—especially those trending in the job market—th
+Missing Key Skills: Point out any important skills or competencies—especially those trending in t
