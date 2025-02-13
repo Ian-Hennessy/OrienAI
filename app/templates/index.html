@@ -4,40 +4,51 @@
     <title>OrienAI: Jumpstart Your Resume!</title>
     <script>
         function uploadResume() {
-            let formData = new FormData();
-            const pdfFile = document.getElementById("resume_pdf").files[0];
-            // Try to get a file from the DOCX input
-            const docxFile = document.getElementById("resume_docx").files[0];
-            // Check which file is provided
-            if (pdfFile && docxFile) {
-                alert("Sorry, we can only support one file upload at at time");
-                return
+          let formData = new FormData();
+          const fileInput = document.getElementById("resume");
+          const file = fileInput.files[0];
+          if (!file) {
+            alert("Please select a file to upload!");
+            return;
+          }
+      
+          // Determine file type based on MIME type or extension.
+          let fileType;
+          if (file.type === "application/pdf") {
+            fileType = "pdf";
+          } else if (
+            file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+            file.type === "application/msword"
+          ) {
+            fileType = "docx";
+          } else {
+            // Fallback to file extension if MIME type isn't definitive
+            const extension = file.name.split('.').pop().toLowerCase();
+            if (extension === "pdf") {
+              fileType = "pdf";
+            } else if (extension === "doc" || extension === "docx") {
+              fileType = "docx";
             } else {
-                if (pdfFile) {
-                formData.append("file", pdfFile);
-                formData.append("file_type", "pdf");
-            } else if (docxFile) {
-                formData.append("file", docxFile);
-                formData.append("file_type", "docx");
-            } else {
-                alert("Sorry, we didn't receive your file!");
-                return
+              alert("Unsupported file type!");
+              return;
             }
-        }
-            fetch("/", { method: "POST", body: formData })
+          }
+      
+          formData.append("file", file);
+          formData.append("file_type", fileType);
+      
+          fetch("/", { method: "POST", body: formData })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("feedback").innerText = data.feedback;
-            });
+              document.getElementById("feedback").innerText = data.feedback;
+            })
+            .catch(error => console.error("Error:", error));
         }
-    </script>
+      </script>
 </head>
 <body>
     <h1>Upload Your Resume for Review</h1>
-    <small>For Word Documents:</small>
-    <input type="file" id="resume_docx" accept=".docx, .doc">
-    <small>For PDF Documents:</small>
-    <input type ="file" id="resume_pdf" accept=".pdf">
+    <input type="file" id="resume" accept=".docx, .doc, .pdf">
     <button onclick="uploadResume()">Analyze</button>
     <h2>Feedback:</h2>
     <p id="feedback"></p>
