@@ -5,8 +5,25 @@
     <script>
         function uploadResume() {
             let formData = new FormData();
-            formData.append("resume", document.getElementById("resume").files[0]);
-
+            const pdfFile = document.getElementById("resume_pdf").files[0];
+            // Try to get a file from the DOCX input
+            const docxFile = document.getElementById("resume_docx").files[0];
+            // Check which file is provided
+            if (pdfFile && docxFile) {
+                alert("Sorry, we can only support one file upload at at time");
+                return
+            } else {
+                if (pdfFile) {
+                formData.append("file", pdfFile);
+                formData.append("file_type", "pdf");
+            } else if (docxFile) {
+                formData.append("file", docxFile);
+                formData.append("file_type", "docx");
+            } else {
+                alert("Sorry, we didn't receive your file!");
+                return
+            }
+        }
             fetch("/", { method: "POST", body: formData })
             .then(response => response.json())
             .then(data => {
@@ -20,4 +37,9 @@
     <small>For Word Documents:</small>
     <input type="file" id="resume_docx" accept=".docx, .doc">
     <small>For PDF Documents:</small>
-    <input type 
+    <input type ="file" id="resume_pdf" accept=".pdf">
+    <button onclick="uploadResume()">Analyze</button>
+    <h2>Feedback:</h2>
+    <p id="feedback"></p>
+</body>
+</html>
