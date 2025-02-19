@@ -69,38 +69,51 @@ Resume:
     messages=[{"role": "user", "content": prompt}])
     return response.choices[0].message.content
 
+def format_serialized_output(file, ftype, specs):
+        if not file:
+            return jsonify({"feedback": "No file uploaded."}), 400
+        filetext = None
+        feedback = None
+        # extract text from pdf
+        if ftype == "pdf":
+            filetext = extract_text_from_pdf(file)
+        # extract text from .docx
+        if ftype == "docx" or ftype == "doc":
+            filetext = extract_text_from_docx(file)
+        if filetext:
+            if specs:
+                feedback = analyze_resume_with_specs(filetext, specs)
+            else:
+                feedback = analyze_resume_no_specs(filetext)
+            if feedback:
+                return jsonify({"feedback": feedback})
+            else:
+                feedback = "Sorry, an error occured. Please reload the page and try again."
+                return jsonify({"feedback": feedback})
+            
+        else:
+            feedback = "Sorry, an error occurred. Please reload the page and try again :)"
+            return jsonify({"feedback": feedback}), 400
+
+
+
 @app.route("/")
 @app.route("/home")
 def home():
     return render_template("home.html")
 
+# index is the main route of the website 
 @app.route("/index", methods=["GET", "POST"])
 def index():
-    user_specs = request.form.get("user_specs_for_prompt")
-    if request.method == "POST":
-        # commented out for now so we don't waste openai credits 
-        # resume_file = request.files["resume"]
-        # text = extract_text_from_pdf(resume_file)
-        # if user_specs:
-        #   feedback = analyze_resume(text, user_specs)
-        # else:
-        #   feedback = analyze_resume(text)
-        #
-        # return jsonify({"feedback": feedback})
 
+    if request.method == "POST":
+        # get the user specifications (if any) from the form
+        user_specs = request.form.get("user_specs_for_prompt")
+        # get the resume file itself 
         resume_file = request.files.get("file")
+        # -> what type of file 
         ftype = request.form.get("file_type")
-        if not resume_file:
-            return jsonify({"feedback": "No file uploaded."}), 400
-        if ftype == "pdf":
-            feedback = extract_text_from_pdf(resume_file)
-            return jsonify({"feedback": feedback})
-        if ftype == "docx" or ftype == "doc":
-            feedback = extract_text_from_docx(resume_file)
-            return jsonify({"feedback": feedback})
-        else:
-            feedback = "Sorry, an error occurred. Please reload the page and try again :)"
-            return jsonify({"feedback": feedback}), 400
+        return format_serialized_output(resume_file, ftype, user_specs)
     return render_template("index.html")
 
 if __name__ == '__main__':
