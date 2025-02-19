@@ -27,4 +27,83 @@ def analyze_resume_with_specs(text, specs):
 You are a highly experienced career mentor and recruiter. Your task is to analyze the following resume and provide structured, high-quality feedback that is both informative and encouraging. Your analysis should cover:
 
 Formatting Issues: Identify any layout or design problems that could confuse the reader or detract from the overall presentation.
-Missing Key Skills: Point out any important skills or competencies—especially those trending in t
+Missing Key Skills: Point out any important skills or competencies—especially those trending in the job market—that appear to be missing from the resume.
+Overall Readability: Evaluate how clearly the resume communicates the candidate’s experience and qualifications.
+Areas for Improvement: Suggest specific ways to enhance both the quality and quantity of resume points, with a particular focus on soft skills and experiential highlights.
+In your response:
+
+Use a friendly, helpful tone as if you were a mentor speaking directly to the candidate. Use the second-person (e.g., “You have,” “You might consider”).
+Pay special attention to any hobbies or interests listed outside of academic or professional contexts. Highlight how these can be used to showcase your unique character and strengths.
+Employ the “sandwich method” in your feedback: start with positive comments, follow with constructive suggestions for improvement, and end with encouraging, motivating words.
+Conclude your analysis with a brief, uplifting phrase to inspire the candidate to keep refining their resume and to explore the rest of the application features.
+Avoid using bold or italics, as these are not represented well in the output text.
+
+Here are some specific areas I'd like you to focus on: {specs}
+
+
+Resume:
+{text}
+"""
+def analyze_resume_no_specs(text):
+    prompt = f"""
+You are a highly experienced career mentor and recruiter. Your task is to analyze the following resume and provide structured, high-quality feedback that is both informative and encouraging. Your analysis should cover:
+
+Formatting Issues: Identify any layout or design problems that could confuse the reader or detract from the overall presentation.
+Missing Key Skills: Point out any important skills or competencies—especially those trending in the job market—that appear to be missing from the resume.
+Overall Readability: Evaluate how clearly the resume communicates the candidate’s experience and qualifications.
+Areas for Improvement: Suggest specific ways to enhance both the quality and quantity of resume points, with a particular focus on soft skills and experiential highlights.
+In your response:
+
+Use a friendly, helpful tone as if you were a mentor speaking directly to the candidate. Use the second-person (e.g., “You have,” “You might consider”).
+Pay special attention to any hobbies or interests listed outside of academic or professional contexts. Highlight how these can be used to showcase your unique character and strengths.
+Employ the “sandwich method” in your feedback: start with positive comments, follow with constructive suggestions for improvement, and end with encouraging, motivating words.
+Conclude your analysis with a brief, uplifting phrase to inspire the candidate to keep refining their resume and to explore the rest of the application features.
+Avoid using bold or italics, as these are not represented well in the output text.
+
+
+
+Resume:
+{text}
+"""
+    response = openai.ChatCompletion.create(model="gpt-4", 
+    messages=[{"role": "user", "content": prompt}])
+    return response.choices[0].message.content
+
+@app.route("/")
+@app.route("/home")
+def home():
+    return render_template("home.html")
+
+@app.route("/index", methods=["GET", "POST"])
+def index():
+    user_specs = request.form.get("user_specs_for_prompt")
+    if request.method == "POST":
+        # commented out for now so we don't waste openai credits 
+        # resume_file = request.files["resume"]
+        # text = extract_text_from_pdf(resume_file)
+        # if user_specs:
+        #   feedback = analyze_resume(text, user_specs)
+        # else:
+        #   feedback = analyze_resume(text)
+        #
+        # return jsonify({"feedback": feedback})
+
+        resume_file = request.files.get("file")
+        ftype = request.form.get("file_type")
+        if not resume_file:
+            return jsonify({"feedback": "No file uploaded."}), 400
+        if ftype == "pdf":
+            feedback = extract_text_from_pdf(resume_file)
+            return jsonify({"feedback": feedback})
+        if ftype == "docx" or ftype == "doc":
+            feedback = extract_text_from_docx(resume_file)
+            return jsonify({"feedback": feedback})
+        else:
+            feedback = "Sorry, an error occurred. Please reload the page and try again :)"
+            return jsonify({"feedback": feedback}), 400
+    return render_template("index.html")
+
+if __name__ == '__main__':
+    # Get the port from environment variable, default to 5000 if not set.
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

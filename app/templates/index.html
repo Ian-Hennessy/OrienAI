@@ -50,7 +50,16 @@
     <h1>Upload Your Resume for Review</h1>
     <input type="file" id="resume" accept=".docx, .doc, .pdf">
     <button onclick="uploadResume()">Analyze</button>
-    <h2>Feedback:</h2>
+    <h2>If you'd like to tell our AI tool more about yourself and your goals,
+        enter that information here!</h2>
+
+    <form method="POST" actions="/submit">
+        <input type="text" name="user_specs_to_prompt" placeholder="Enter your 
+        speficications here!">
+        <input type="submit" value="Enter">
+    </form>
+
+    <h3>Feedback:</h3>
     <p id="feedback"></p>
 </body>
 </html>
